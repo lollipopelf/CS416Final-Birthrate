@@ -1,55 +1,106 @@
 <!DOCTYPE html>
 <html lang="en">
-<script src="https://d3js.org/d3.v7.min.js"></script>
+<head>
+  <meta charset="UTF-8">
+  <title>Birthrate and GDP Charts</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+
+<svg id="birthRateChart" width="600" height="300"></svg>
+<svg id="gdpChart" width="600" height="300"></svg>
+
 <script>
   d3.csv("brithratecn.csv").then(function(birthData) {
     birthData = birthData.map(d => ({
       year: +d.year,
       birthrate: +d.birthrate
     }));
+
     d3.csv("gdp person.csv").then(function(gdpData) {
-  gdpData = gdpData.map(d => ({
+      gdpData = gdpData.map(d => ({
         year: +d.year,
         gdp: +d.gdp
       }));
+
+      const margin = { top: 20, right: 30, bottom: 40, left: 50 },
+            width = 600 - margin.left - margin.right,
+            height = 300 - margin.top - margin.bottom;
+
+      const svgBirth = d3.select("#birthRateChart")
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+      const xBirth = d3.scaleLinear()
+        .domain(d3.extent(birthData, d => d.year))
+        .range([0, width]);
+
+      const yBirth = d3.scaleLinear()
+        .domain([0, d3.max(birthData, d => d.birthrate)])
+        .range([height, 0]);
+
+      svgBirth.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(xBirth).tickFormat(d3.format("d")));
+
+      svgBirth.append("g")
+        .call(d3.axisLeft(yBirth));
+
+      const lineBirth = d3.line()
+        .x(d => xBirth(d.year))
+        .y(d => yBirth(d.birthrate));
+
+      svgBirth.append("path")
+        .datum(birthData)
+        .attr("fill", "none")
+        .attr("stroke", "steelblue")
+        .attr("stroke-width", 2)
+        .attr("d", lineBirth);
+
+      svgBirth.append("text")
+        .attr("x", width / 2)
+        .attr("y", height + margin.bottom - 5)
+        .attr("text-anchor", "middle")
+        .text("Birth Rate Over Time");
+
+      const svgGdp = d3.select("#gdpChart")
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+      const xGdp = d3.scaleLinear()
+        .domain(d3.extent(gdpData, d => d.year))
+        .range([0, width]);
+
+      const yGdp = d3.scaleLinear()
+        .domain([0, d3.max(gdpData, d => d.gdp)])
+        .range([height, 0]);
+
+      svgGdp.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(xGdp).tickFormat(d3.format("d")));
+
+      svgGdp.append("g")
+        .call(d3.axisLeft(yGdp));
+
+      const lineGdp = d3.line()
+        .x(d => xGdp(d.year))
+        .y(d => yGdp(d.gdp));
+
+      svgGdp.append("path")
+        .datum(gdpData)
+        .attr("fill", "none")
+        .attr("stroke", "orange")
+        .attr("stroke-width", 2)
+        .attr("d", lineGdp);
+
+      svgGdp.append("text")
+        .attr("x", width / 2)
+        .attr("y", height + margin.bottom - 5)
+        .attr("text-anchor", "middle")
+        .text("GDP per Capita Over Time");
     });
   });
-
-  <script>
-  const margin = { top: 20, right: 30, bottom: 40, left: 50 },
-        width = 600 - margin.left - margin.right,
-        height = 300 - margin.top - margin.bottom;
-
-  const svgBirth = d3.select("#birthRateChart")
-    .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-  const x = d3.scaleLinear()
-    .domain(d3.extent(birthData, d => d.year))
-    .range([0, width]);
-
-  const y = d3.scaleLinear()
-    .domain([0, d3.max(birthData, d => d.birthrate)])
-    .range([height, 0]);
-
-  svgBirth.append("g")
-    .attr("transform", "translate(0," + height + ")")
-    .call(d3.axisBottom(x).tickFormat(d3.format("d")));
-
-  svgBirth.append("g")
-    .call(d3.axisLeft(y));
-
-  const line = d3.line()
-    .x(d => x(d.year))
-    .y(d => y(d.birthrate));
-
-  svgBirth.append("path")
-    .datum(birthData)
-    .attr("fill", "none")
-    .attr("stroke", "steelblue")
-    .attr("stroke-width", 2)
-    .attr("d", line);
 </script>
-</script>
+
 </body>
 </html>
