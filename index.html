@@ -12,163 +12,140 @@
   <script>
     const parseYear = d3.timeParse("%Y");
 
-    d3.csv("birthratecn.csv").then(function(birthData) {
-      birthData = birthData
-        .filter(d => d.year && d.birthrate)
-        .map(d => ({
-          year: parseYear(d.year),
-          birthrate: +d.birthrate / 10  // 每千人 → 百分比
-        }));
+    Promise.all([
+      d3.csv("birthratecn.csv"),
+      d3.csv("gdp person.csv")
+    ]).then(([birthRaw, gdpRaw]) => {
+      const birthData = birthRaw.filter(d => d.year && d.birthrate).map(d => ({
+        year: parseYear(d.year),
+        birthrate: +d.birthrate / 10
+      }));
 
-      d3.csv("gdp person.csv").then(function(gdpData) {
-        gdpData = gdpData
-          .filter(d => d.year && d.gdp)
-          .map(d => ({
-            year: parseYear(d.year),
-            gdp: +d.gdp
-          }));
+      const gdpData = gdpRaw.filter(d => d.year && d.gdp).map(d => ({
+        year: parseYear(d.year),
+        gdp: +d.gdp
+      }));
 
-        const margin = { top: 20, right: 30, bottom: 60, left: 70 },
-              width = 1200 - margin.left - margin.right,
-              height = 300 - margin.top - margin.bottom;
+      const margin = { top: 20, right: 30, bottom: 60, left: 70 },
+            width = 1200 - margin.left - margin.right,
+            height = 300 - margin.top - margin.bottom;
 
-        // === Birthrate Chart ===
-        const svgBirth = d3.select("#birthRateChart")
-          .append("g")
-          .attr("transform", `translate(${margin.left},${margin.top})`);
+      // ========== Birthrate Chart ==========
+      const svgBirth = d3.select("#birthRateChart")
+        .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
 
-        const xBirth = d3.scaleTime()
-          .domain(d3.extent(birthData, d => d.year))
-          .range([0, width]);
+      const xBirth = d3.scaleTime()
+        .domain(d3.extent(birthData, d => d.year))
+        .range([0, width]);
 
-        const yBirth = d3.scaleLinear()
-          .domain([0, d3.max(birthData, d => d.birthrate)]).nice()
-          .range([height, 0]);
+      const yBirth = d3.scaleLinear()
+        .domain([0, d3.max(birthData, d => d.birthrate)]).nice()
+        .range([height, 0]);
 
-        svgBirth.append("g")
-          .attr("transform", `translate(0,${height})`)
-          .call(
-            d3.axisBottom(xBirth)
-              .ticks(d3.timeYear.every(5))
-              .tickFormat(d3.timeFormat("%Y"))
-          )
-          .selectAll("text")
-          .attr("transform", "rotate(-45)")
-          .style("text-anchor", "end");
+      svgBirth.append("g")
+        .attr("transform", `translate(0,${height})`)
+        .call(d3.axisBottom(xBirth).ticks(d3.timeYear.every(5)).tickFormat(d3.timeFormat("%Y")))
+        .selectAll("text")
+        .attr("transform", "rotate(-45)")
+        .style("text-anchor", "end");
 
-        svgBirth.append("g")
-          .call(d3.axisLeft(yBirth).tickFormat(d => d + "%"));
+      svgBirth.append("g").call(d3.axisLeft(yBirth).tickFormat(d => d + "%"));
 
-        svgBirth.append("path")
-          .datum(birthData)
-          .attr("fill", "none")
-          .attr("stroke", "steelblue")
-          .attr("stroke-width", 2)
-          .attr("d", d3.line()
-            .x(d => xBirth(d.year))
-            .y(d => yBirth(d.birthrate))
-          );
+      svgBirth.append("path")
+        .datum(birthData)
+        .attr("fill", "none")
+        .attr("stroke", "steelblue")
+        .attr("stroke-width", 2)
+        .attr("d", d3.line().x(d => xBirth(d.year)).y(d => yBirth(d.birthrate)));
 
-        svgBirth.append("text")
-          .attr("x", width / 2)
-          .attr("y", -10)
-          .attr("text-anchor", "middle")
-          .style("font-size", "14px")
-          .text("Birth Rate (% of population)");
+      svgBirth.append("text")
+        .attr("x", width / 2)
+        .attr("y", -10)
+        .attr("text-anchor", "middle")
+        .style("font-size", "14px")
+        .text("Birth Rate (% of population)");
 
-        // === GDP Chart ===
-        const svgGdp = d3.select("#gdpChart")
-          .append("g")
-          .attr("transform", `translate(${margin.left},${margin.top})`);
+      // ========== GDP Chart ==========
+      const svgGdp = d3.select("#gdpChart")
+        .append("g")
+        .attr("transform", `translate(${margin.left},${margin.top})`);
 
-        const xGdp = d3.scaleTime()
-          .domain(d3.extent(gdpData, d => d.year))
-          .range([0, width]);
+      const xGdp = d3.scaleTime()
+        .domain(d3.extent(gdpData, d => d.year))
+        .range([0, width]);
 
-        const yGdp = d3.scaleLinear()
-          .domain([0, d3.max(gdpData, d => d.gdp)]).nice()
-          .range([height, 0]);
+      const yGdp = d3.scaleLinear()
+        .domain([0, d3.max(gdpData, d => d.gdp)]).nice()
+        .range([height, 0]);
 
-        svgGdp.append("g")
-          .attr("transform", `translate(0,${height})`)
-          .call(
-            d3.axisBottom(xGdp)
-              .ticks(d3.timeYear.every(5))
-              .tickFormat(d3.timeFormat("%Y"))
-          )
-          .selectAll("text")
-          .attr("transform", "rotate(-45)")
-          .style("text-anchor", "end");
+      svgGdp.append("g")
+        .attr("transform", `translate(0,${height})`)
+        .call(d3.axisBottom(xGdp).ticks(d3.timeYear.every(5)).tickFormat(d3.timeFormat("%Y")))
+        .selectAll("text")
+        .attr("transform", "rotate(-45)")
+        .style("text-anchor", "end");
 
-        svgGdp.append("g")
-          .call(d3.axisLeft(yGdp));
+      svgGdp.append("g").call(d3.axisLeft(yGdp));
 
-        svgGdp.append("path")
-          .datum(gdpData)
-          .attr("fill", "none")
-          .attr("stroke", "orange")
-          .attr("stroke-width", 2)
-          .attr("d", d3.line()
-            .x(d => xGdp(d.year))
-            .y(d => yGdp(d.gdp))
-          );
+      svgGdp.append("path")
+        .datum(gdpData)
+        .attr("fill", "none")
+        .attr("stroke", "orange")
+        .attr("stroke-width", 2)
+        .attr("d", d3.line().x(d => xGdp(d.year)).y(d => yGdp(d.gdp)));
 
-        svgGdp.append("text")
-          .attr("x", width / 2)
-          .attr("y", -10)
-          .attr("text-anchor", "middle")
-          .style("font-size", "14px")
-          .text("GDP per Capita (USD)");
+      svgGdp.append("text")
+        .attr("x", width / 2)
+        .attr("y", -10)
+        .attr("text-anchor", "middle")
+        .style("font-size", "14px")
+        .text("GDP per Capita (USD)");
 
-        const overlay = svgBirth.append("rect")
-  .attr("width", width)
-  .attr("height", height)
-  .attr("fill", "none")
-  .attr("pointer-events", "all");
+      // ========== Cross Highlight (Overlay on top) ==========
+      const bisect = d3.bisector(d => d.year).left;
 
-const focusLine = svgBirth.append("line")
-  .attr("stroke", "gray")
-  .attr("y1", 0)
-  .attr("y2", height)
-  .style("display", "none");
+      const overlay = svgBirth.append("rect")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("fill", "none")
+        .attr("pointer-events", "all");
 
-const focusDotBirth = svgBirth.append("circle")
-  .attr("r", 4)
-  .attr("fill", "steelblue")
-  .style("display", "none");
+      const focusLine = svgBirth.append("line")
+        .attr("stroke", "gray")
+        .attr("y1", 0)
+        .attr("y2", height)
+        .style("display", "none");
 
-const focusDotGdp = svgGdp.append("circle")
-  .attr("r", 4)
-  .attr("fill", "orange")
-  .style("display", "none");
+      const focusDotBirth = svgBirth.append("circle")
+        .attr("r", 5)
+        .attr("fill", "steelblue")
+        .style("display", "none");
 
-const bisect = d3.bisector(d => d.year).left;
+      const focusDotGdp = svgGdp.append("circle")
+        .attr("r", 5)
+        .attr("fill", "orange")
+        .style("display", "none");
 
-overlay.on("mousemove", function(event) {
-  const [x] = d3.pointer(event);
-  const x0 = xBirth.invert(x);
-  const i = bisect(birthData, x0);
-  const d = birthData[i] || birthData[birthData.length - 1];
-  const g = gdpData.find(g => +g.year === +d.year);
+      overlay.on("mousemove", function(event) {
+        const [x] = d3.pointer(event);
+        const x0 = xBirth.invert(x);
+        const i = bisect(birthData, x0, 1);
+        const d = birthData[i - 1] || birthData[0];
+        const g = gdpData.find(g => +g.year === +d.year);
 
-  if (d && g) {
-    const cx = xBirth(d.year);
-    focusLine.attr("x1", cx).attr("x2", cx).style("display", null);
-    focusDotBirth
-      .attr("cx", cx)
-      .attr("cy", yBirth(d.birthrate))
-      .style("display", null);
-    focusDotGdp
-      .attr("cx", xGdp(g.year))
-      .attr("cy", yGdp(g.gdp))
-      .style("display", null);
-  }
-});
+        if (d && g) {
+          const cx = xBirth(d.year);
+          focusLine.attr("x1", cx).attr("x2", cx).style("display", null);
+          focusDotBirth.attr("cx", cx).attr("cy", yBirth(d.birthrate)).style("display", null);
+          focusDotGdp.attr("cx", xGdp(g.year)).attr("cy", yGdp(g.gdp)).style("display", null);
+        }
+      });
 
-overlay.on("mouseout", () => {
-  focusLine.style("display", "none");
-  focusDotBirth.style("display", "none");
-  focusDotGdp.style("display", "none");
+      overlay.on("mouseout", () => {
+        focusLine.style("display", "none");
+        focusDotBirth.style("display", "none");
+        focusDotGdp.style("display", "none");
       });
     });
   </script>
