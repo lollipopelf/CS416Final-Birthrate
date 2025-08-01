@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CS416 Final - Birthrate vs GDP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>China's GDP Growth vs Declining Birthrate</h1>
+    <p class="intro">A narrative visualization exploring why China's birthrate is falling despite economic growth.</p>
+  </header>
+
+  <main>
+    <!-- Scene 1 -->
+    <section id="scene1" class="scene">
+      <h2>Economic Boom, Fewer Babies?</h2>
+      <p>China’s GDP has grown steadily over the past two decades. But strangely, the number of newborns has dropped every year since 2016.</p>
+      <div id="chart1"></div>
+    </section>
+
+    <!-- Scene 2 -->
+    <section id="scene2" class="scene">
+      <h2>Visualizing the Trend</h2>
+      <p>This chart compares GDP growth and birthrate from 2000 to 2023.</p>
+      <div id="chart2"></div>
+    </section>
+
+    <!-- Scene 3 -->
+    <section id="scene3" class="scene">
+      <h2>Why is Birthrate Falling?</h2>
+      <ul>
+        <li>🏙️ Urban pressure: Housing & education costs are high</li>
+        <li>🎓 Women pursue higher education → later marriage</li>
+        <li>🧠 New generation mindset: Many don’t want kids</li>
+        <li>📉 Policy impact is limited</li>
+        <li>🦠 Pandemic (2020–2022)</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <p>Data source: World Bank, China Statistical Yearbook</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
