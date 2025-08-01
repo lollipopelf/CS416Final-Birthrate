@@ -70,6 +70,31 @@
         .style("font-size", "14px")
         .text("Birth Rate (% of population)")
 
+      const policyAnnotations = [
+  { year: 1979, text: "One-child policy" },
+  { year: 2016, text: "Two-child policy" },
+  { year: 2021, text: "Three-child policy" }
+];
+
+policyAnnotations.forEach(policy => {
+  const x = xBirth(parseYear(policy.year.toString()));
+  
+  svgBirth.append("line")
+    .attr("x1", x)
+    .attr("x2", x)
+    .attr("y1", 0)
+    .attr("y2", height)
+    .attr("stroke", "red")
+    .attr("stroke-dasharray", "4");
+
+  svgBirth.append("text")
+    .attr("x", x + 5)
+    .attr("y", 15)
+    .attr("fill", "red")
+    .attr("font-size", "11px")
+    .text(policy.text);
+});
+      
       const svgGdp = d3.select("#gdpChart")
         .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`)
