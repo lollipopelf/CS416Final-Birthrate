@@ -14,38 +14,42 @@
       }));
     });
   });
+
+  <script>
+  const margin = { top: 20, right: 30, bottom: 40, left: 50 },
+        width = 600 - margin.left - margin.right,
+        height = 300 - margin.top - margin.bottom;
+
+  const svgBirth = d3.select("#birthRateChart")
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  const x = d3.scaleLinear()
+    .domain(d3.extent(birthData, d => d.year))
+    .range([0, width]);
+
+  const y = d3.scaleLinear()
+    .domain([0, d3.max(birthData, d => d.birthrate)])
+    .range([height, 0]);
+
+  svgBirth.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(d3.axisBottom(x).tickFormat(d3.format("d")));
+
+  svgBirth.append("g")
+    .call(d3.axisLeft(y));
+
+  const line = d3.line()
+    .x(d => x(d.year))
+    .y(d => y(d.birthrate));
+
+  svgBirth.append("path")
+    .datum(birthData)
+    .attr("fill", "none")
+    .attr("stroke", "steelblue")
+    .attr("stroke-width", 2)
+    .attr("d", line);
 </script>
-const margin = { top: 20, right: 30, bottom: 40, left: 50 },
-      width = 600 - margin.left - margin.right,
-      height = 300 - margin.top - margin.bottom;
-const svgBirth = d3.select("#birthRateChart")
-  .append("g")
-  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-const x = d3.scaleLinear()
-  .domain(d3.extent(birthData, d => d.year)) 
-  .range([0, width]);
-
-const y = d3.scaleLinear()
-  .domain([0, d3.max(birthData, d => d.birthrate)])
-  .range([height, 0]);
-
-svgBirth.append("g")
-  .attr("transform", "translate(0," + height + ")")
-  .call(d3.axisBottom(x).tickFormat(d3.format("d")));
-
-svgBirth.append("g")
-  .call(d3.axisLeft(y));
-
-const line = d3.line()
-  .x(d => x(d.year))
-  .y(d => y(d.birthrate));
-
-svgBirth.append("path")
-  .datum(birthData)
-  .attr("fill", "none")
-  .attr("stroke", "steelblue")
-  .attr("stroke-width", 2)
-  .attr("d", line);
+</script>
 </body>
 </html>
