@@ -119,6 +119,56 @@
           .attr("text-anchor", "middle")
           .style("font-size", "14px")
           .text("GDP per Capita (USD)");
+
+        const overlay = svgBirth.append("rect")
+  .attr("width", width)
+  .attr("height", height)
+  .attr("fill", "none")
+  .attr("pointer-events", "all");
+
+const focusLine = svgBirth.append("line")
+  .attr("stroke", "gray")
+  .attr("y1", 0)
+  .attr("y2", height)
+  .style("display", "none");
+
+const focusDotBirth = svgBirth.append("circle")
+  .attr("r", 4)
+  .attr("fill", "steelblue")
+  .style("display", "none");
+
+const focusDotGdp = svgGdp.append("circle")
+  .attr("r", 4)
+  .attr("fill", "orange")
+  .style("display", "none");
+
+const bisect = d3.bisector(d => d.year).left;
+
+overlay.on("mousemove", function(event) {
+  const [x] = d3.pointer(event);
+  const x0 = xBirth.invert(x);
+  const i = bisect(birthData, x0);
+  const d = birthData[i] || birthData[birthData.length - 1];
+  const g = gdpData.find(g => +g.year === +d.year);
+
+  if (d && g) {
+    const cx = xBirth(d.year);
+    focusLine.attr("x1", cx).attr("x2", cx).style("display", null);
+    focusDotBirth
+      .attr("cx", cx)
+      .attr("cy", yBirth(d.birthrate))
+      .style("display", null);
+    focusDotGdp
+      .attr("cx", xGdp(g.year))
+      .attr("cy", yGdp(g.gdp))
+      .style("display", null);
+  }
+});
+
+overlay.on("mouseout", () => {
+  focusLine.style("display", "none");
+  focusDotBirth.style("display", "none");
+  focusDotGdp.style("display", "none");
       });
     });
   </script>
