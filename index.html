@@ -34,9 +34,9 @@
       const width = 1200 - margin.left - margin.right
       const height = 300 - margin.top - margin.bottom
 
-      const svgBirth = d3.select("#birthRateChart")
-        .append("g")
-        .attr("transform", `translate(${margin.left},${margin.top})`)
+ const svgBirth = d3.select("#birthRateChart")
+  .append("g")
+  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
       const xBirth = d3.scaleTime()
         .domain(d3.extent(birthData, d => d.year))
@@ -47,11 +47,15 @@
         .range([height, 0])
 
       svgBirth.append("g")
-        .attr("transform", `translate(0,${height})`)
-        .call(d3.axisBottom(xBirth).ticks(d3.timeYear.every(5)).tickFormat(d3.timeFormat("%Y")))
-        .selectAll("text")
-        .attr("transform", "rotate(-45)")
-        .style("text-anchor", "end")
+  .attr("transform", "translate(0," + height + ")")
+  .call(
+    d3.axisBottom(xBirth)
+      .ticks(d3.timeYear.every(5))
+      .tickFormat(d3.timeFormat("%Y"))
+  )
+  .selectAll("text")
+  .attr("transform", "rotate(-45)")
+  .style("text-anchor", "end");
 
       svgBirth.append("g")
         .call(d3.axisLeft(yBirth).tickFormat(d => d + "%"))
@@ -95,25 +99,29 @@ policyAnnotations.forEach(policy => {
     .text(policy.text);
 });
       
-      const svgGdp = d3.select("#gdpChart")
-        .append("g")
-        .attr("transform", `translate(${margin.left},${margin.top})`)
+     const svgGdp = d3.select("#gdpChart")
+  .append("g")
+  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-      const xGdp = d3.scaleTime()
-        .domain(d3.extent(gdpData, d => d.year))
-        .range([0, width])
+const xGdp = d3.scaleTime()
+  .domain(d3.extent(gdpData, function(d) { return d.year }))
+  .range([0, width]);
 
-      const yGdp = d3.scaleLinear()
-        .domain([0, d3.max(gdpData, d => d.gdp)]).nice()
-        .range([height, 0])
+const yGdp = d3.scaleLinear()
+  .domain([0, d3.max(gdpData, function(d) { return d.gdp })]).nice()
+  .range([height, 0]);
 
-      svgGdp.append("g")
-        .attr("transform", `translate(0,${height})`)
-        .call(d3.axisBottom(xGdp).ticks(d3.timeYear.every(5)).tickFormat(d3.timeFormat("%Y")))
-        .selectAll("text")
-        .attr("transform", "rotate(-45)")
-        .style("text-anchor", "end")
-
+svgGdp.append("g")
+  .attr("transform", "translate(0," + height + ")")
+  .call(
+    d3.axisBottom(xGdp)
+      .ticks(d3.timeYear.every(5))
+      .tickFormat(d3.timeFormat("%Y"))
+  )
+  .selectAll("text")
+  .attr("transform", "rotate(-45)")
+  .style("text-anchor", "end");
+      
       svgGdp.append("g")
         .call(d3.axisLeft(yGdp))
 
