@@ -11,7 +11,7 @@
 <svg id="gdpChart" width="600" height="300"></svg>
 
 <script>
-  d3.csv("brithratecn.csv").then(function(birthData) {
+  d3.csv("birthratecn.csv").then(function(birthData) {
     birthData = birthData.map(d => ({
       year: +d.year,
       birthrate: +d.birthrate
