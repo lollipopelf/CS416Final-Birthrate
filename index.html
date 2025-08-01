@@ -147,6 +147,54 @@
         focusDotBirth.style("display", "none");
         focusDotGdp.style("display", "none");
       });
+      const overlayGdp = svgGdp.append("rect")
+  .attr("width", width)
+  .attr("height", height)
+  .attr("fill", "none")
+  .attr("pointer-events", "all");
+
+const focusLineGdp = svgGdp.append("line")
+  .attr("stroke", "gray")
+  .attr("y1", 0)
+  .attr("y2", height)
+  .style("display", "none");
+
+const focusDotGdp2 = svgGdp.append("circle")
+  .attr("r", 4)
+  .attr("fill", "orange")
+  .style("display", "none");
+
+const focusDotBirth2 = svgBirth.append("circle")
+  .attr("r", 4)
+  .attr("fill", "steelblue")
+  .style("display", "none");
+
+overlayGdp.on("mousemove", function(event) {
+  const [x] = d3.pointer(event);
+  const x0 = xGdp.invert(x);
+  const i = bisect(gdpData, x0);
+  const g = gdpData[i] || gdpData[gdpData.length - 1];
+  const d = birthData.find(d => +d.year === +g.year);
+
+  if (g && d) {
+    const cx = xGdp(g.year);
+    focusLineGdp.attr("x1", cx).attr("x2", cx).style("display", null);
+    focusDotGdp2
+      .attr("cx", cx)
+      .attr("cy", yGdp(g.gdp))
+      .style("display", null);
+    focusDotBirth2
+      .attr("cx", xBirth(d.year))
+      .attr("cy", yBirth(d.birthrate))
+      .style("display", null);
+  }
+});
+
+overlayGdp.on("mouseout", () => {
+  focusLineGdp.style("display", "none");
+  focusDotGdp2.style("display", "none");
+  focusDotBirth2.style("display", "none");
+});
     });
   </script>
 </body>
