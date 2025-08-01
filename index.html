@@ -6,106 +6,119 @@
   <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
-  
-<svg id="birthRateChart" width="800" height="300"></svg>
-<svg id="gdpChart" width="800" height="300"></svg>
+  <svg id="birthRateChart" width="1000" height="300"></svg>
+  <svg id="gdpChart" width="1000" height="300"></svg>
 
-<script>
-  d3.csv("birthratecn.csv").then(function(birthData) {
-    birthData = birthData.map(d => ({
-      year: +d.year,
-      birthrate: +d.birthrate
-    }));
+  <script>
+    const parseYear = d3.timeParse("%Y");
 
-    d3.csv("gdp person.csv").then(function(gdpData) {
-      gdpData = gdpData.map(d => ({
-        year: +d.year,
-        gdp: +d.gdp
+    d3.csv("birthratecn.csv").then(function(birthData) {
+      birthData = birthData.map(d => ({
+        year: parseYear(d.year),
+        birthrate: +d.birthrate / 10  // 每千人出生数 → 百分比
       }));
 
-      const margin = { top: 20, right: 30, bottom: 40, left: 60 },
-            width = 800 - margin.left - margin.right,
-            height = 300 - margin.top - margin.bottom;
+      d3.csv("gdp person.csv").then(function(gdpData) {
+        gdpData = gdpData.map(d => ({
+          year: parseYear(d.year),
+          gdp: +d.gdp
+        }));
 
-      const svgBirth = d3.select("#birthRateChart")
-        .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        const margin = { top: 20, right: 30, bottom: 60, left: 60 },
+              width = 1000 - margin.left - margin.right,
+              height = 300 - margin.top - margin.bottom;
 
-      const xBirth = d3.scaleLinear()
-        .domain([1960, 2023])
-        .range([0, width])
-        .nice();
+        // Birthrate 图
+        const svgBirth = d3.select("#birthRateChart")
+          .append("g")
+          .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-      const yBirth = d3.scaleLinear()
-        .domain([0, d3.max(birthData, d => d.birthrate)])
-        .range([height, 0])
-        .nice();
+        const xBirth = d3.scaleTime()
+          .domain(d3.extent(birthData, d => d.year))
+          .range([0, width]);
 
-      svgBirth.append("g")
-        .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(xBirth).tickFormat(d3.format("d")));
+        const yBirth = d3.scaleLinear()
+          .domain([0, d3.max(birthData, d => d.birthrate)]).nice()
+          .range([height, 0]);
 
-      svgBirth.append("g")
-        .call(d3.axisLeft(yBirth).tickFormat(d3.format(".2f")));
+        svgBirth.append("g")
+          .attr("transform", "translate(0," + height + ")")
+          .call(
+            d3.axisBottom(xBirth)
+              .ticks(d3.timeYear.every(1))
+              .tickFormat(d3.timeFormat("%Y"))
+          )
+          .selectAll("text")
+          .attr("transform", "rotate(-45)")
+          .style("text-anchor", "end");
 
-      const lineBirth = d3.line()
-        .x(d => xBirth(d.year))
-        .y(d => yBirth(d.birthrate));
+        svgBirth.append("g")
+          .call(d3.axisLeft(yBirth).tickFormat(d => d + "%"));
 
-      svgBirth.append("path")
-        .datum(birthData)
-        .attr("fill", "none")
-        .attr("stroke", "steelblue")
-        .attr("stroke-width", 2)
-        .attr("d", lineBirth);
+        const lineBirth = d3.line()
+          .x(d => xBirth(d.year))
+          .y(d => yBirth(d.birthrate));
 
-      svgBirth.append("text")
-        .attr("x", width / 2)
-        .attr("y", height + margin.bottom - 5)
-        .attr("text-anchor", "middle")
-        .text("Birth Rate Over Time");
+        svgBirth.append("path")
+          .datum(birthData)
+          .attr("fill", "none")
+          .attr("stroke", "steelblue")
+          .attr("stroke-width", 2)
+          .attr("d", lineBirth);
 
-      const svgGdp = d3.select("#gdpChart")
-        .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        svgBirth.append("text")
+          .attr("x", width / 2)
+          .attr("y", -10)
+          .attr("text-anchor", "middle")
+          .style("font-size", "14px")
+          .text("Birth Rate (% of population)");
 
-      const xGdp = d3.scaleLinear()
-        .domain([1960, 2023])
-        .range([0, width])
-        .nice();
+        // GDP 图
+        const svgGdp = d3.select("#gdpChart")
+          .append("g")
+          .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-      const yGdp = d3.scaleLinear()
-        .domain([0, d3.max(gdpData, d => d.gdp)])
-        .range([height, 0])
-        .nice();
+        const xGdp = d3.scaleTime()
+          .domain(d3.extent(gdpData, d => d.year))
+          .range([0, width]);
 
-      svgGdp.append("g")
-        .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(xGdp).tickFormat(d3.format("d")));
+        const yGdp = d3.scaleLinear()
+          .domain([0, d3.max(gdpData, d => d.gdp)]).nice()
+          .range([height, 0]);
 
-      svgGdp.append("g")
-        .call(d3.axisLeft(yGdp).tickFormat(d3.format(".2f")));
+        svgGdp.append("g")
+          .attr("transform", "translate(0," + height + ")")
+          .call(
+            d3.axisBottom(xGdp)
+              .ticks(d3.timeYear.every(1))
+              .tickFormat(d3.timeFormat("%Y"))
+          )
+          .selectAll("text")
+          .attr("transform", "rotate(-45)")
+          .style("text-anchor", "end");
 
-      const lineGdp = d3.line()
-        .x(d => xGdp(d.year))
-        .y(d => yGdp(d.gdp));
+        svgGdp.append("g")
+          .call(d3.axisLeft(yGdp));
 
-      svgGdp.append("path")
-        .datum(gdpData)
-        .attr("fill", "none")
-        .attr("stroke", "orange")
-        .attr("stroke-width", 2)
-        .attr("d", lineGdp);
+        const lineGdp = d3.line()
+          .x(d => xGdp(d.year))
+          .y(d => yGdp(d.gdp));
 
-      svgGdp.append("text")
-        .attr("x", width / 2)
-        .attr("y", height + margin.bottom - 5)
-        .attr("text-anchor", "middle")
-        .text("GDP per Capita Over Time");
+        svgGdp.append("path")
+          .datum(gdpData)
+          .attr("fill", "none")
+          .attr("stroke", "orange")
+          .attr("stroke-width", 2)
+          .attr("d", lineGdp);
+
+        svgGdp.append("text")
+          .attr("x", width / 2)
+          .attr("y", -10)
+          .attr("text-anchor", "middle")
+          .style("font-size", "14px")
+          .text("GDP per Capita");
+      });
     });
-  });
-</script>
-
+  </script>
 </body>
 </html>
-</script>
